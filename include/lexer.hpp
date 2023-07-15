@@ -9,35 +9,16 @@ class Lexer
 public:
     static std::array<std::string, 28> OPERATIONS
     {
-        std::string {"+"}, std::string {"-"}, std::string {"*"}, std::string {"/"}, std::string {"%"},
-        std::string {"=="}, std::string {"!="}, std::string {">"}, std::string {">="}, std::string {"<"},
-        std::string {"<="}, std::string {"!"}, std::string {"||"}, std::string {"&&"}, std::string {"~"},
-        std::string {"|"}, std::string {"&"}, std::string {"^"}, std::string {"<<"}, std::string {">>"},
-        std::string {"-b"}, std::string {"-c"}, std::string {"-d"}, std::string {"-e"}, std::string {"-r"},
-        std::string {"-w"}, std::string {"-x"}, std::string {"-s"}, std::string {"."}, std::string {".."},
-        std::string {"\\"}, std::string {":"}, std::string {"%"}, std::string {"|"}, std::string {"!"},
-        std::string {"?"}, std::string {"#"}, std::string {"&"}, std::string {"$"}, std::string {";"},
-        std::string {","}, std::string {"("}, std::string {")"}, std::string {"{"}, std::string {"}"},
-        std::string {"["}, std::string {"]"}, std::string {"="}
+        "+"s, "-"s, "*"s, "/"s, "%"s, "=="s, "!="s, ">"s, ">="s, "<"s, "<="s, "!"s, "||"s, "&&"s, "~"s, "|"s, "&"s,
+        "^"s, "<<"s, ">>"s, "-b"s, "-c"s, "-d"s, "-e"s, "-r"s, "-w"s, "-x"s, "-s"s, "."s, ".."s, "\\"s, ":"s, "%"s,
+        "|"s, "!"s, "?"s, "#"s, "&"s, "$"s, ";"s, ","s, "("s, ")"s, "{"s, "}"s, "["s, "]"s, "="s
     };
-    static std::array<std::string, 10> FIGURES
-    {
-        std::string {"0"}, std::string {"1"}, std::string {"2"}, std::string {"3"}, std::string {"4"},
-        std::string {"5"}, std::string {"6"}, std::string {"7"}, std::string {"8"}, std::string {"9"}
-    };
+    static std::array<std::string, 10> FIGURES {"0"s, "1"s, "2"s, "3"s, "4"s, "5"s, "6"s, "7"s, "8"s, "9"s};
     static std::array<std::string, 42> ALPHABET
     {
-        std::string {"a"}, std::string {"b"}, std::string {"c"}, std::string {"d"}, std::string {"e"},
-        std::string {"f"}, std::string {"g"}, std::string {"h"}, std::string {"i"}, std::string {"j"},
-        std::string {"k"}, std::string {"l"}, std::string {"m"}, std::string {"n"}, std::string {"o"},
-        std::string {"p"}, std::string {"q"}, std::string {"r"}, std::string {"s"}, std::string {"t"},
-        std::string {"u"}, std::string {"v"}, std::string {"w"}, std::string {"x"}, std::string {"y"},
-        std::string {"z"}, std::string {"A"}, std::string {"B"}, std::string {"C"}, std::string {"D"},
-        std::string {"E"}, std::string {"F"}, std::string {"G"}, std::string {"H"}, std::string {"I"},
-        std::string {"J"}, std::string {"K"}, std::string {"L"}, std::string {"M"}, std::string {"N"},
-        std::string {"O"}, std::string {"P"}, std::string {"Q"}, std::string {"R"}, std::string {"S"},
-        std::string {"T"}, std::string {"U"}, std::string {"V"}, std::string {"W"}, std::string {"X"},
-        std::string {"Y"}, std::string {"Z"}
+        "a"s, "b"s, "c"s, "d"s, "e"s, "f"s, "g"s, "h"s, "i"s, "j"s, "k"s, "l"s, "m"s, "n"s, "o"s, "p"s, "q"s, "r"s,
+        "s"s, "t"s, "u"s, "v"s, "w"s, "x"s, "y"s, "z"s, "A"s, "B"s, "C"s, "D"s, "E"s, "F"s, "G"s, "H"s, "I"s, "J"s,
+        "K"s, "L"s, "M"s, "N"s, "O"s, "P"s, "Q"s, "R"s, "S"s, "T"s, "U"s, "V"s, "W"s, "X"s, "Y"s, "Z"s
     };
 
     static bool isOperator(std::string c);

@@ -2,6 +2,7 @@
 #include "../include/token.hpp"
 #include "../include/tokenizer.hpp"
 
+using namespace std::literals;
 
 /**
  * check if the token is a valid operator
@@ -13,12 +14,12 @@ bool Lexer::isOperator(std::string c)
 
 bool Lexer::isWhitespace(std::string c)
 {
-    return c == ' ';
+    return c == ' 's;
 }
 
 bool Lexer::isNewline(int c)
 {
-    return c == "\r" || c == "\n";
+    return c == "\r"s || c == "\n"s;
 }
 
 bool Lexer::isNumeric(std::string c)
@@ -39,8 +40,8 @@ bool Lexer::isValidSingleQuoteStringStart(std::vector<Token> tokens)
     if (tokens.size() > 0) {
         var previousToken = tokens[tokens.size() - 1];
         if (previousToken.getIsOperator() &&
-            (previousToken.getValue() == ">" ||
-            previousToken.getValue() == ")")) {
+            (previousToken.getValue() == ">"s ||
+            previousToken.getValue() == ")"s)) {
 
             return false;
         }

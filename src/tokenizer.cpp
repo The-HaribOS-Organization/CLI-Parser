@@ -4,6 +4,8 @@
 #include "../include/lexer.hpp"
 #include "../include/tokenizer.hpp"
 
+using namespace std::literals;
+
 Token::Token(std::string& _str) : str(_str), position(0), column(0), line(1)
 {
 }
@@ -26,11 +28,11 @@ Tokens Tokenizer::tokenize()
 
             tokens.push(Tokenizer.consumeNumber());
 
-        } else if (Tokenizer.currentChar() == '"') {            // strings
+        } else if (Tokenizer.currentChar() == '"'s) {            // strings
 
             tokens.push(Tokenizer.consumeString());
 
-        } else if (Tokenizer.currentChar() == "'") {            // valid quote string start
+        } else if (Tokenizer.currentChar() == "'"s) {            // valid quote string start
             if (Lexer::isValidSingleQuoteStringStart(tokens)) {
 
                 tokens.push(Tokenizer.consumeString());
@@ -124,7 +126,7 @@ Token Tokenizer::consumeNumber()
     }
 
     // II
-    if (this->currentChar() == "." && Lexer.isNumeric(this->nextChar())) {
+    if (this->currentChar() == "."s && Lexer.isNumeric(this->nextChar())) {
         value += this->consumeChar();
     }
     while (Lexer::isNumeric(this->consumeChar())) {
@@ -132,12 +134,12 @@ Token Tokenizer::consumeNumber()
     }
 
     // III
-    if (this->currentChar() == "e" || this->currentChar() == "E") {
+    if (this->currentChar() == "e"s || this->currentChar() == "E"s) {
         // scientific notation, e.g. 1e6 or 1e-6
         if (Lexer.isNumeric(this->nextChar())) {
             // e.g. 1e6
             value += this->consumeChar();
-        } else if (this->nextChar() == "-") {
+        } else if (this->nextChar() == "-"s) {
             // e.g. 1e-6
             value += this->consumeChar();
             value += this->consumeChar();
@@ -181,21 +183,21 @@ Token Tokenizer::consumeString()
     std::string value { "" };
 
     while (this->currentChar() && this->currentChar() != startChar) {
-        if (this->currentChar() == "\\") {
+        if (this->currentChar() == "\\"s) {
             this->consumeChar(); // consume escape char and get the next one
             let nextChar = this->consumeChar();
-            if (nextChar == "b") {
-                value += "\b";
-            } else if (nextChar == "f") {
-                value += "\f";
-            } else if (nextChar == "n") {
-                value += "\n";
-            } else if (nextChar == "r") {
-                value += "\r";
-            } else if (nextChar == "t") {
-                value += "\t";
-            } else if (nextChar == "v") {
-                value += "\v";
+            if (nextChar == "b"s) {
+                value += "\b"s;
+            } else if (nextChar == "f"s) {
+                value += "\f"s;
+            } else if (nextChar == "n"s) {
+                value += "\n"s;
+            } else if (nextChar == "r"s) {
+                value += "\r"s;
+            } else if (nextChar == "t"s) {
+                value += "\t"s;
+            } else if (nextChar == "v"s) {
+                value += "\v"s;
             } else {
                 value += nextChar;
             }
@@ -220,7 +222,7 @@ Token Tokenizer::consumeString()
 Token Tokenizer::consumeWhitespace()
 {
     Token whitespace { makeToken("WHITESPACE", std::string { "" }, false) };
-    std::string value{ "" };
+    std::string value { "" };
     while (this->currentChar() && Lexer::isWhitespace(this->currentChar())) {
         if (Lexer::isNewline(this->currentChar())) {
             this->column = 0;
