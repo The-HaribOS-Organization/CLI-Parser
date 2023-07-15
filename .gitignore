@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+/bin/
+/obj/
+/.idea/
+
+# exclude Standart Tartine's Library files
+/src/std/
+/include/std/
