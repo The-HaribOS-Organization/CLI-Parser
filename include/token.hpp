@@ -2,43 +2,69 @@
 #define TOKEN
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 
-/// DISCLAIMER : these classes aren't finished yet.
-
-class Token
+class BaseToken
 {
 public:
-    Token() = delete;
-    Token(const std::string& _type,
-          const std::string& _value,
-          int _position,  // Token.start and Token.end are defined by _position
-          int _column,
-          int _line,
-          bool _isOperator
-          ) noexcept;
+    BaseToken() = delete;
+    BaseToken(std::string _type,
+              int _position,  // Token.start and Token.end are defined by _position
+              int _column,
+              int _line,
+              bool _isOperator
+              ) noexcept;
+
+    BaseToken(BaseToken&& other) noexcept;
+    BaseToken& operator=(const BaseToken& other) = default;
+
+    virtual ~BaseToken() noexcept = default;
 
     void setType(std::string new_type);
-    void setValue(std::string new_value);
     void setEnd(int new_end);
 
-    std::string getType() const noexcept;
-    std::string getValue() const noexcept;
-    int getStart() const noexcept;
-    int getEnd() const noexcept;
-    int getColumn() const noexcept;
-    int getLine() const noexcept;
-    bool getIsOperator() const noexcept;
+    [[nodiscard]] std::string getType() const noexcept;
+    [[nodiscard]] int getStart() const noexcept;
+    [[nodiscard]] int getEnd() const noexcept;
+    [[nodiscard]] int getColumn() const noexcept;
+    [[nodiscard]] int getLine() const noexcept;
+    [[nodiscard]] bool getIsOperator() const noexcept;
 private:
     std::string type;
-    std::string value;
     int start;
     int end;
     int column;
     int line;
     bool isOperator;
 };
+
+template<class T>
+class Token : public BaseToken
+{
+public:
+    Token() = delete;
+    Token(std::string _type,
+          T _value,
+          int _position,
+          int _column,
+          int _line,
+          bool _isOperator) noexcept;
+
+    Token(Token&& other) noexcept;
+    Token& operator=(const Token& other) = default;
+
+    ~Token() noexcept override;
+
+    void setValue(T new_value);
+    T getValue() const noexcept;
+private:
+    T value;
+};
+
+
+/// DISCLAIMER : this class isn't finished yet.
 
 /**
  * set of tokens
@@ -47,10 +73,12 @@ class Tokens
 {
 public:
     Tokens() = delete;
-    Tokens(std::vector<Token> _tokens, std::vector<Token> _consumed, std::string& str) noexcept;
+    Tokens(std::vector<BaseToken*> _tokens,
+           std::vector<BaseToken*> _consumed,
+           std::string str) noexcept;
 private:
-    std::vector<Token> tokens;
-    std::vector<Token> _consumed;
+    std::vector<BaseToken*> tokens;
+    std::vector<BaseToken*> consumed;
     std::string str;
 };
 

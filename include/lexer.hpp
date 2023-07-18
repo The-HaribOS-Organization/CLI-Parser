@@ -2,30 +2,38 @@
 #define LEXER
 
 #include <array>  //temp
+#include <memory>
 #include <string>  //temp
+#include <string_view>  //temp
+#include <vector>  //temp
+
+#include "token.hpp"
 
 class Lexer
 {
 public:
-    static std::array<std::string, 28> OPERATIONS
+    static constexpr std::array<std::string_view, 48> OPERATIONS
     {
-        "+"s, "-"s, "*"s, "/"s, "%"s, "=="s, "!="s, ">"s, ">="s, "<"s, "<="s, "!"s, "||"s, "&&"s, "~"s, "|"s, "&"s,
-        "^"s, "<<"s, ">>"s, "-b"s, "-c"s, "-d"s, "-e"s, "-r"s, "-w"s, "-x"s, "-s"s, "."s, ".."s, "\\"s, ":"s, "%"s,
-        "|"s, "!"s, "?"s, "#"s, "&"s, "$"s, ";"s, ","s, "("s, ")"s, "{"s, "}"s, "["s, "]"s, "="s
+        "+", "-", "*", "/", "%", "==", "!=", ">", ">=", "<", "<=", "!", "||",
+        "&&", "~", "|", "&", "^", "<<", ">>",
+        "-b", "-c", "-d", "-e", "-r", "-w", "-x", "-s", ".", "..", "\\", ":", "%", "|", "!", "?", "#", "&", "$", ";",
+        ",", "(", ")", "{", "}", "[", "]", "="
     };
-    static std::array<std::string, 10> FIGURES {"0"s, "1"s, "2"s, "3"s, "4"s, "5"s, "6"s, "7"s, "8"s, "9"s};
-    static std::array<std::string, 42> ALPHABET
+    static constexpr const std::array<char, 10> FIGURES {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+    static constexpr const std::array<char, 52> ALPHABET
     {
-        "a"s, "b"s, "c"s, "d"s, "e"s, "f"s, "g"s, "h"s, "i"s, "j"s, "k"s, "l"s, "m"s, "n"s, "o"s, "p"s, "q"s, "r"s,
-        "s"s, "t"s, "u"s, "v"s, "w"s, "x"s, "y"s, "z"s, "A"s, "B"s, "C"s, "D"s, "E"s, "F"s, "G"s, "H"s, "I"s, "J"s,
-        "K"s, "L"s, "M"s, "N"s, "O"s, "P"s, "Q"s, "R"s, "S"s, "T"s, "U"s, "V"s, "W"s, "X"s, "Y"s, "Z"s
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+        'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+        'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
     };
 
-    static bool isOperator(std::string c);
-    static bool isWhitespace(std::string c);
-    static bool isNewline(std::string c);
-    static bool isNumeric(std::string c);
-    static bool isAlpha(std::string c);
+    static bool isOperator(std::string_view c);
+    static bool isStartOfOperator(char c);
+    static bool isWhitespace(char c);
+    static bool isNewline(char c);
+    static bool isNumeric(char c);
+    static bool isAlpha(char c);
+    static bool isValidSingleQuoteStringStart(std::vector<BaseToken*> tokens);
     static Tokens tokenize(std::string str);
 private:
 };
