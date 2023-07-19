@@ -1,12 +1,11 @@
 #include <array>
 #include <iostream>
 
-#include "../include/lexer.hpp"
-#include "../include/tokenizer.hpp"
+#include "lexer.hpp"
+#include "tokenizer.hpp"
 
-using namespace std::literals;
 
-Token::Token(std::string& _str) : str(_str), position(0), column(0), line(1)
+Tokenizer::Tokenizer(std::string _str) : str(std::move(_str)), position(0), column(0), line(1)
 {
 }
 
@@ -15,78 +14,70 @@ Token::Token(std::string& _str) : str(_str), position(0), column(0), line(1)
  */
 Tokens Tokenizer::tokenize()
 {
-    std::vector<Token> tokens {};
+    std::vector<BaseToken*> tokens {};
     std::string last_token { "<START>" };
 
-    while(this->position < this->str.len.size())
+    while(position < str.size())
     {
-        if (Lexer::isWhitespace(Tokenizer.currentChar())) {      // whitespaces
-
-            tokens.push_back(Tokenizer.consumeWhitespace());
-
-        } else if (Lexer::isNumeric(Tokenizer.currentChar())) {  // numerics
-
-            tokens.push(Tokenizer.consumeNumber());
-
-        } else if (Tokenizer.currentChar() == '"'s) {            // strings
-
-            tokens.push(Tokenizer.consumeString());
-
-        } else if (Tokenizer.currentChar() == "'"s) {            // valid quote string start
-            if (Lexer::isValidSingleQuoteStringStart(tokens)) {
-
-                tokens.push(Tokenizer.consumeString());
-
-            } else {
-
-                tokens.push(Tokenizer.consumeOperator());
-
+        if (Lexer::isWhitespace(currentChar()))             // whitespaces
+        {
+            auto token { consumeWhitespace() };
+            tokens.emplace_back(&token);
+        }
+        else if (Lexer::isNumeric(currentChar()))           // numerics
+        {
+            auto token { consumeNumber() };
+            tokens.emplace_back(&token);
+        }
+        else if (currentChar() == '"')                         // strings
+        {
+            auto token { consumeString() };
+            tokens.emplace_back(&token);
+        }
+        else if (currentChar() == '\'')                        // valid quote string start
+        {
+            if (Lexer::isValidSingleQuoteStringStart(tokens))
+            {
+                auto token { consumeString() };
+                tokens.emplace_back(&token);
             }
-        } else if (Lexer::OPERATIONS[Tokenizer.currentChar()]) {  // operators
-
-            tokens.push(Tokenizer.consumeOperator());
-
-        } else {                                                  // 404 - char does not exists (lol)
-
-            if (position < this->str.size()) {
-                std::cout << "Error: 404, char does not exists (" << Tokenizer.currentChar() << ")." << "\n";
+            else
+            {
+                auto token { consumeOperator() };
+                tokens.emplace_back(&token);
             }
-
+        }
+        else if (Lexer::isStartOfOperator(currentChar()))   // operator
+        {
+            auto token { consumeOperator() };
+            tokens.emplace_back(&token);
+        }
+        else                                                   // 404 - char does not exists (lol)
+        {
+            if (position < str.size())
+            {
+                std::cout << "Error: 404, char does not exists (" << currentChar() << ")." << "\n";
+            }
         }
     }
 
-    Tokens token_set { tokens, std::vector<Token> {}, str };
-
-    return token_set;
+    Tokens tokens_set { tokens, std::vector<BaseToken*> {}, str };
+    return tokens_set;
 }
 
-Token Tokenizer::makeToken(std::string type, std::string value, bool isOperator)
+char Tokenizer::currentChar()
 {
-    Token token
-    {
-        type,
-        value,
-        this->position,
-        this->column,
-        this->line,
-        isOperator
-    };
-    return token;
+    return str[position];
 }
 
-std::string Tokenizer::currentChar()
+char Tokenizer::nextChar()
 {
-    return this->str[this->position];
+    return str[position + 1];
 }
 
-std::string Tokenizer::nextChar()
+char Tokenizer::nextCharAt(int delta_index)
 {
-    return this->str[this->position + 1];
-}
-
-std::string Tokenizer::nextCharAt(int delta_index)
-{
-    return this->str[this->position + delta_index];
+    return str[position + delta_index];
 }
 
 /**
@@ -94,11 +85,11 @@ std::string Tokenizer::nextCharAt(int delta_index)
  * increments position & column
  * @returns last_token
  */
-std::string Tokenizer::consumeChar()
+char Tokenizer::consumeChar()
 {
-    std::string last_token { this->currentChar() };
-    this->position++;
-    this->column++;
+    char last_token { currentChar() };
+    position++;
+    column++;
     return last_token;
 }
 
@@ -114,61 +105,80 @@ std::string Tokenizer::consumeChar()
  *
  * Welpike
  */
-Token Tokenizer::consumeNumber()
+Token<std::string_view> Tokenizer::consumeNumber()
 {
-    Token token { this->makeToken("NUMBER", std::string {""}, false) };
+    Token<std::string_view> token { "NUMBER", "", position, column, line, false };
 
-    std::string value { this->consumeChar() };
+    std::string value { consumeChar() };
 
     // I
-    while (Lexer::isNumeric(this->consumeChar())) {
-        value += this->consumeChar();
+    while (Lexer::isNumeric(consumeChar()))
+    {
+        value += consumeChar();
     }
 
     // II
-    if (this->currentChar() == "."s && Lexer.isNumeric(this->nextChar())) {
-        value += this->consumeChar();
+    if (currentChar() == '.' && Lexer::isNumeric(nextChar()))
+    {
+        value += consumeChar();
     }
-    while (Lexer::isNumeric(this->consumeChar())) {
-        value += this->consumeChar();
+
+    while (Lexer::isNumeric(consumeChar()))
+    {
+        value += consumeChar();
     }
 
     // III
-    if (this->currentChar() == "e"s || this->currentChar() == "E"s) {
+    if (currentChar() == 'e' || currentChar() == 'E')
+    {
         // scientific notation, e.g. 1e6 or 1e-6
-        if (Lexer.isNumeric(this->nextChar())) {
+        if (Lexer::isNumeric(nextChar()))
+        {
             // e.g. 1e6
-            value += this->consumeChar();
-        } else if (this->nextChar() == "-"s) {
+            value += consumeChar();
+        } else if (nextChar() == '-')
+        {
             // e.g. 1e-6
-            value += this->consumeChar();
-            value += this->consumeChar();
+            value += consumeChar();
+            value += consumeChar();
         }
     }
 
     // IV
-    while (Lexer::isNumeric(this->consumeChar())) {
-        value += this->consumeChar();
+    while (Lexer::isNumeric(consumeChar()))
+    {
+        value += consumeChar();
     }
 
-    token.setValue(value);
-    token.setEnd()
+    std::string_view _value { value };
+
+    token.setValue(_value);
+    token.setEnd(position);
+    return token;
 }
 
 /**
  * This method handle all types of operators, including operators with many characters.
  */
-Token Tokenizer::consumeOperator()
+Token<std::string_view> Tokenizer::consumeOperator()
 {
-    Token op { this->makeToken(std::string {""}, std::string {""}, true) };
-    std::string value { this->consumeChar() }; // consume leading char
+    Token<std::string_view> op { "", "", position, column, line, true };
+    std::string value { consumeChar() }; // consume leading char
 
-    while (this->currentChar() && Lexer::OPERATIONS[value + this->currentChar()]) {
-        value += this->consumeChar();
+    auto arr_begin { std::begin(Lexer::OPERATIONS) };
+    auto arr_end { std::end(Lexer::OPERATIONS) };
+    auto it { std::find(arr_begin, arr_end, std::string_view {value + currentChar()}) };
+
+    while (currentChar() && it != arr_end)
+    {
+        value += consumeChar();
+        it = std::find(arr_begin, arr_end, std::string_view {value + currentChar()});
     }
 
-    op.setType(Lexer::OPERATIONS[value]);
-    op.setValue(value);
+    std::string_view _value { value };
+
+    op.setType(std::string (*it));  // i'm not sure about that
+    op.setValue(_value);
     op.setEnd(position);
     return op;
 }
@@ -176,61 +186,86 @@ Token Tokenizer::consumeOperator()
 /**
  * handles strings, even with special whitespaces (e.g: \t)
  */
-Token Tokenizer::consumeString()
+Token<std::string_view> Tokenizer::consumeString()
 {
-    Token str { this->makeToken("STRING", std::string {""}, false) };
-    std::string startChar { this->consumeChar() };
-    std::string value { "" };
+    Token<std::string_view> string { "STRING", "", position, column, line, false };
+    char startChar { consumeChar() };
+    std::string value {};
 
-    while (this->currentChar() && this->currentChar() != startChar) {
-        if (this->currentChar() == "\\"s) {
-            this->consumeChar(); // consume escape char and get the next one
-            let nextChar = this->consumeChar();
-            if (nextChar == "b"s) {
-                value += "\b"s;
-            } else if (nextChar == "f"s) {
-                value += "\f"s;
-            } else if (nextChar == "n"s) {
-                value += "\n"s;
-            } else if (nextChar == "r"s) {
-                value += "\r"s;
-            } else if (nextChar == "t"s) {
-                value += "\t"s;
-            } else if (nextChar == "v"s) {
-                value += "\v"s;
-            } else {
+    while (currentChar() && currentChar() != startChar)
+    {
+        if (currentChar() == '\\')
+        {
+            consumeChar(); // consume escape char and get the next one
+            char nextChar = consumeChar();
+            if (nextChar == 'b')
+            {
+                value += "\b";
+            }
+            else if (nextChar == 'f')
+            {
+                value += "\f";
+            }
+            else if (nextChar == 'n')
+            {
+                value += "\n";
+            }
+            else if (nextChar == 'r')
+            {
+                value += "\r";
+            }
+            else if (nextChar == 't')
+            {
+                value += "\t";
+            }
+            else if (nextChar == 'v')
+            {
+                value += "\v";
+            }
+            else
+            {
                 value += nextChar;
             }
-        } else {
-            value += this->consumeChar();
+        }
+        else
+        {
+            value += consumeChar();
         }
     }
-    if (this->currentChar() != startChar) {
+    if (currentChar() != startChar)
+    {
         // ERROR (string not terminated, only one quote)
-        std::cout << "Error : string not terminated (" << this->currentChar() << "\n";
-    } else {
-        this->consumeChar(); // consume final quote
+        std::cout << "Error : string not terminated (" << currentChar() << ")\n";
     }
-    str.setValue(value);
-    str.setEnd(position);
-    return str;
+    else
+    {
+        consumeChar(); // consume final quote
+    }
+    string.setValue(std::string_view (value));
+    string.setEnd(position);
+    return string;
 }
 
 /**
  * Handles whitespaces and carriage returns
  */
-Token Tokenizer::consumeWhitespace()
+Token<std::string_view> Tokenizer::consumeWhitespace()
 {
-    Token whitespace { makeToken("WHITESPACE", std::string { "" }, false) };
-    std::string value { "" };
-    while (this->currentChar() && Lexer::isWhitespace(this->currentChar())) {
-        if (Lexer::isNewline(this->currentChar())) {
-            this->column = 0;
-            this->line++;
+    Token<std::string_view> whitespace { "WHITESPACE", "", position, column, line, false };
+    std::string value {};
+
+    while (currentChar() && Lexer::isWhitespace(currentChar()))
+    {
+        if (Lexer::isNewline(currentChar()))
+        {
+            column = 0;
+            line++;
         }
-        value += this->consumeChar();
+        value += consumeChar();
     }
-    whitespace.setValue(value);
-    whitespace.setEnd(this->position);
+
+    whitespace.setValue(std::string_view (value));
+    whitespace.setEnd(position);
     return whitespace;
+    //return { "WHITESPACE", std::string_view (value), position, column, line, false };
 }

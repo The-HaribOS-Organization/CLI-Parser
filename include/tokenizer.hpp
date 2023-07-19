@@ -10,30 +10,29 @@ class Tokenizer
 {
 public:
     Tokenizer() = delete;
-    Tokenizer(std::string& _str);
+    Tokenizer(std::string _str);
 
     Tokens tokenize();
 
     // Tokenizer utils
 
-    Token makeToken(std::string type, std::string value, bool isOperator);
-    std::string currentChar();
-    std::string nextChar();
-    std::string nextCharAt(int delta_index);
-    std::string consumeChar();
+    char currentChar();
+    char nextChar();
+    char nextCharAt(int delta_index);
+    char consumeChar();
     /**
      * Handles integers, floats and scientific numbers.
      */
-    Token consumeNumber();
+    Token<std::string_view> consumeNumber();
     /**
      * This method handle all type of operators, including operators with many characters.
      */
-    Token consumeOperator();
-    Token consumeString();
+    Token<std::string_view> consumeOperator();
+    Token<std::string_view> consumeString();
     /**
      * Handles whitespaces and carriage returns
      */
-    Token consumeWhitespace();
+    Token<std::string_view> consumeWhitespace();
 private:
     std::string str;
     int position;
