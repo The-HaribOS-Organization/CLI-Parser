@@ -10,7 +10,7 @@ class Tokenizer
 {
 public:
     Tokenizer() = delete;
-    Tokenizer(std::string _str);
+    explicit Tokenizer(std::string&& _str);
 
     Tokens tokenize();
 

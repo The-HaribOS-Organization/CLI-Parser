@@ -19,22 +19,13 @@ public:
         "-b", "-c", "-d", "-e", "-r", "-w", "-x", "-s", ".", "..", "\\", ":", "%", "|", "!", "?", "#", "&", "$", ";",
         ",", "(", ")", "{", "}", "[", "]", "="
     };
-    static constexpr const std::array<char, 10> FIGURES {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    static constexpr const std::array<char, 52> ALPHABET
-    {
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-        'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-        'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-    };
 
-    static bool isOperator(std::string_view c);
-    static bool isStartOfOperator(char c);
-    static bool isWhitespace(char c);
-    static bool isNewline(char c);
-    static bool isNumeric(char c);
-    static bool isAlpha(char c);
-    static bool isValidSingleQuoteStringStart(std::vector<BaseToken*> tokens);
-    static Tokens tokenize(std::string str);
+    static constexpr bool isOperator(std::string_view c);
+    static constexpr bool isStartOfOperator(char c);
+    static constexpr bool isWhitespace(char c);
+    static constexpr bool isNewline(char c);
+    static bool isValidSingleQuoteStringStart(const std::vector<std::unique_ptr<BaseToken>>& tokens);
+    static Tokens tokenize(std::string&& str);
 private:
 };
 
