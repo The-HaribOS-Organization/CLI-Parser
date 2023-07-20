@@ -5,7 +5,7 @@
 #include "tokenizer.hpp"
 
 
-Tokenizer::Tokenizer(std::string _str) : str(std::move(_str)), position(0), column(0), line(1)
+Tokenizer::Tokenizer(std::string&& _str) : str(std::move(_str)), position(0), column(0), line(1)
 {
 }
 
@@ -14,43 +14,37 @@ Tokenizer::Tokenizer(std::string _str) : str(std::move(_str)), position(0), colu
  */
 Tokens Tokenizer::tokenize()
 {
-    std::vector<BaseToken*> tokens {};
+    std::vector<std::unique_ptr<BaseToken>> tokens {};
     std::string last_token { "<START>" };
 
     while(position < str.size())
     {
         if (Lexer::isWhitespace(currentChar()))             // whitespaces
         {
-            auto token { consumeWhitespace() };
-            tokens.emplace_back(&token);
+            tokens.emplace_back(std::make_unique<Token<std::string_view>>(consumeWhitespace()));
         }
-        else if (Lexer::isNumeric(currentChar()))           // numerics
+        else if (std::isdigit(currentChar()))           // numerics
         {
-            auto token { consumeNumber() };
-            tokens.emplace_back(&token);
+            tokens.emplace_back(std::make_unique<Token<std::string_view>>(consumeNumber()));
         }
         else if (currentChar() == '"')                         // strings
         {
-            auto token { consumeString() };
-            tokens.emplace_back(&token);
+            tokens.emplace_back(std::make_unique<Token<std::string_view>>(consumeString()));
         }
         else if (currentChar() == '\'')                        // valid quote string start
         {
             if (Lexer::isValidSingleQuoteStringStart(tokens))
             {
-                auto token { consumeString() };
-                tokens.emplace_back(&token);
+                tokens.emplace_back(std::make_unique<Token<std::string_view>>(consumeString()));
             }
             else
             {
-                auto token { consumeOperator() };
-                tokens.emplace_back(&token);
+                tokens.emplace_back(std::make_unique<Token<std::string_view>>(consumeOperator()));
             }
         }
         else if (Lexer::isStartOfOperator(currentChar()))   // operator
         {
-            auto token { consumeOperator() };
-            tokens.emplace_back(&token);
+            tokens.emplace_back(std::make_unique<Token<std::string_view>>(consumeOperator()));
         }
         else                                                   // 404 - char does not exists (lol)
         {
@@ -61,8 +55,7 @@ Tokens Tokenizer::tokenize()
         }
     }
 
-    Tokens tokens_set { tokens, std::vector<BaseToken*> {}, str };
-    return tokens_set;
+    return { std::move(tokens), str };
 }
 
 char Tokenizer::currentChar()
@@ -107,23 +100,23 @@ char Tokenizer::consumeChar()
  */
 Token<std::string_view> Tokenizer::consumeNumber()
 {
-    Token<std::string_view> token { "NUMBER", "", position, column, line, false };
+    Token<std::string_view> token { TokenType::NUMBER, "", position, column, line, false };
 
     std::string value { consumeChar() };
 
     // I
-    while (Lexer::isNumeric(consumeChar()))
+    while (std::isdigit(consumeChar()))
     {
         value += consumeChar();
     }
 
     // II
-    if (currentChar() == '.' && Lexer::isNumeric(nextChar()))
+    if (currentChar() == '.' && std::isdigit(nextChar()))
     {
         value += consumeChar();
     }
 
-    while (Lexer::isNumeric(consumeChar()))
+    while (std::isdigit(consumeChar()))
     {
         value += consumeChar();
     }
@@ -132,7 +125,7 @@ Token<std::string_view> Tokenizer::consumeNumber()
     if (currentChar() == 'e' || currentChar() == 'E')
     {
         // scientific notation, e.g. 1e6 or 1e-6
-        if (Lexer::isNumeric(nextChar()))
+        if (std::isdigit(nextChar()))
         {
             // e.g. 1e6
             value += consumeChar();
@@ -145,7 +138,7 @@ Token<std::string_view> Tokenizer::consumeNumber()
     }
 
     // IV
-    while (Lexer::isNumeric(consumeChar()))
+    while (std::isdigit(consumeChar()))
     {
         value += consumeChar();
     }
@@ -162,7 +155,7 @@ Token<std::string_view> Tokenizer::consumeNumber()
  */
 Token<std::string_view> Tokenizer::consumeOperator()
 {
-    Token<std::string_view> op { "", "", position, column, line, true };
+    Token<std::string_view> op { TokenType::OPERATOR, "", position, column, line, true };
     std::string value { consumeChar() }; // consume leading char
 
     auto arr_begin { std::begin(Lexer::OPERATIONS) };
@@ -175,10 +168,9 @@ Token<std::string_view> Tokenizer::consumeOperator()
         it = std::find(arr_begin, arr_end, std::string_view {value + currentChar()});
     }
 
-    std::string_view _value { value };
-
-    op.setType(std::string (*it));  // i'm not sure about that
-    op.setValue(_value);
+    // FIXME: Replace that line with the TokenType enum class.
+    // op.setType(std::string (*it));  // i'm not sure about that
+    op.setValue(std::move(value));
     op.setEnd(position);
     return op;
 }
@@ -188,7 +180,7 @@ Token<std::string_view> Tokenizer::consumeOperator()
  */
 Token<std::string_view> Tokenizer::consumeString()
 {
-    Token<std::string_view> string { "STRING", "", position, column, line, false };
+    Token<std::string_view> string { TokenType::STRING, "", position, column, line, false };
     char startChar { consumeChar() };
     std::string value {};
 
@@ -251,7 +243,7 @@ Token<std::string_view> Tokenizer::consumeString()
  */
 Token<std::string_view> Tokenizer::consumeWhitespace()
 {
-    Token<std::string_view> whitespace { "WHITESPACE", "", position, column, line, false };
+    Token<std::string_view> whitespace { TokenType::WHITESPACE, "", position, column, line, false };
     std::string value {};
 
     while (currentChar() && Lexer::isWhitespace(currentChar()))
@@ -264,8 +256,11 @@ Token<std::string_view> Tokenizer::consumeWhitespace()
         value += consumeChar();
     }
 
-    whitespace.setValue(std::string_view (value));
+    std::string_view newValue{ std::move(value) };
+
+    whitespace.setValue(newValue);
     whitespace.setEnd(position);
+
     return whitespace;
     //return { "WHITESPACE", std::string_view (value), position, column, line, false };
 }

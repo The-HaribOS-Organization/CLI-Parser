@@ -5,65 +5,50 @@
  * ---------------------------------------------- */
 
 
-BaseToken::BaseToken(std::string _type,
-                     int _position,
-                     int _column,
-                     int _line,
-                     bool _isOperator)
-            noexcept : type(_type), start(_position), end(_position + 1), column(_column), line(_line),
-            isOperator(_isOperator)
+constexpr BaseToken::BaseToken(TokenType _type, int _position, int _column, int _line, bool _isOperator) noexcept
+        : type(_type), start(_position), end(_position + 1), column(_column), line(_line), isOperator(_isOperator)
 {
 }
 
-BaseToken::BaseToken(BaseToken &&other) noexcept :
-            type(std::move(other.type)),
-            start(other.start),
-            end(other.end),
-            column(other.column),
-            line(other.line),
-            isOperator(other.isOperator)
-{
-}
-
-void BaseToken::setType(std::string new_type)
+constexpr void BaseToken::setType(TokenType new_type)
 {
     type = new_type;
 }
 
-void BaseToken::setEnd(int new_end)
+constexpr void BaseToken::setEnd(int new_end)
 {
     end = new_end;
 }
 
-std::string BaseToken::getType() const noexcept
+constexpr TokenType BaseToken::getType() const noexcept
 {
     return type;
 }
 
 
-int BaseToken::getStart() const noexcept
+constexpr int BaseToken::getStart() const noexcept
 {
     return start;
 }
 
-int BaseToken::getEnd() const noexcept
+constexpr int BaseToken::getEnd() const noexcept
 {
     return end;
 }
 
-int BaseToken::getColumn() const noexcept
+constexpr int BaseToken::getColumn() const noexcept
 {
-    return this->column;
+    return column;
 }
 
-int BaseToken::getLine() const noexcept
+constexpr int BaseToken::getLine() const noexcept
 {
-    return this->line;
+    return line;
 }
 
-bool BaseToken::getIsOperator() const noexcept
+constexpr bool BaseToken::getIsOperator() const noexcept
 {
-    return this->isOperator;
+    return isOperator;
 }
 
 
@@ -71,31 +56,20 @@ bool BaseToken::getIsOperator() const noexcept
  * Token                                          *
  * ---------------------------------------------- */
 
-template<typename T>
-Token<T>::Token(std::string _type,
-                T _value,
-                int _position,
-                int _column,
-                int _line,
-                bool _isOperator) noexcept : value(_value), BaseToken(_type, _position, _column, _line, _isOperator)
+template<CorrectTokenType T>
+constexpr Token<T>::Token(TokenType _type, T _value, int _position, int _column, int _line, bool _isOperator) noexcept
+        : value(_value), BaseToken(_type, _position, _column, _line, _isOperator)
 {
 }
 
-template<typename T>
-Token<T>::Token(Token &&other) noexcept :
-        value(std::move(other.value)),
-        BaseToken(other)
-{
-}
-
-template<typename T>
+template<CorrectTokenType T>
 void Token<T>::setValue(T new_value)
 {
     value = new_value;
 }
 
-template<typename T>
-T Token<T>::getValue() const noexcept
+template<CorrectTokenType T>
+const T& Token<T>::getValue() const noexcept
 {
     return value;
 }
@@ -104,10 +78,7 @@ T Token<T>::getValue() const noexcept
  * Tokens                                         *
  * ---------------------------------------------- */
 
-Tokens::Tokens(std::vector<BaseToken*> _tokens,
-               std::vector<BaseToken*> _consumed,
-               std::string _str) noexcept : tokens(std::move(_tokens)),
-                                            consumed(std::move(_consumed)),
-                                            str(std::move(_str))
+Tokens::Tokens(std::vector<std::unique_ptr<BaseToken>>&& _tokens, std::string_view _str) noexcept
+        : tokens(std::move(_tokens)), str(_str)
 {
 }
