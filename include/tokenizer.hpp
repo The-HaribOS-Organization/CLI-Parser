@@ -10,7 +10,7 @@ class Tokenizer
 {
 public:
     Tokenizer() = delete;
-    explicit Tokenizer(std::string&& _str);
+    explicit Tokenizer(std::string _str);
 
     Tokens tokenize();
 
@@ -23,16 +23,16 @@ public:
     /**
      * Handles integers, floats and scientific numbers.
      */
-    Token<std::string_view> consumeNumber();
+    Token consumeNumber();
     /**
      * This method handle all type of operators, including operators with many characters.
      */
-    Token<std::string_view> consumeOperator();
-    Token<std::string_view> consumeString();
+    Token consumeOperator();
+    Token consumeString();
     /**
      * Handles whitespaces and carriage returns
      */
-    Token<std::string_view> consumeWhitespace();
+    Token consumeWhitespace();
 private:
     std::string str;
     int position;
