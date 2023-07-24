@@ -20,12 +20,12 @@ public:
         ",", "(", ")", "{", "}", "[", "]", "="
     };
 
-    static constexpr bool isOperator(std::string_view c);
-    static constexpr bool isStartOfOperator(char c);
-    static constexpr bool isWhitespace(char c);
-    static constexpr bool isNewline(char c);
-    static bool isValidSingleQuoteStringStart(const std::vector<std::unique_ptr<BaseToken>>& tokens);
-    static Tokens tokenize(std::string&& str);
+    static bool isOperator(std::string_view c);
+    static bool isStartOfOperator(char c);
+    static bool isWhitespace(char c);
+    static bool isNewline(char c);
+    static bool isValidSingleQuoteStringStart(const std::vector<Token>& tokens);
+    static Tokens tokenize(std::string str);
 private:
 };
 

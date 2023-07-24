@@ -16,28 +16,29 @@ enum class TokenType
     WHITESPACE
 };
 
-
-class BaseToken
+class Token
 {
 public:
-    constexpr BaseToken(TokenType _type, int _position, int _column, int _line, bool _isOperator) noexcept;
+    Token() = delete;
+    Token(TokenType _type, std::string_view _value, int _position, int _column, int _line, bool _isOperator) noexcept;
 
-    constexpr BaseToken& operator=(const BaseToken& other) = default;
-    constexpr BaseToken(const BaseToken& other) = default;
-    constexpr BaseToken(BaseToken&& other) noexcept = default;
-    constexpr BaseToken& operator=(BaseToken&& other) noexcept = default;
-
-    virtual ~BaseToken() noexcept = default;
+    Token(const Token& other) = default;
+    Token& operator=(const Token& other) = default;
+    Token(Token&& other) noexcept = default;
+    Token& operator=(Token&& other) noexcept = default;
 
     void setType(TokenType new_type);
     void setEnd(int new_end);
 
-    [[nodiscard]] constexpr TokenType getType() const noexcept;
-    [[nodiscard]] constexpr int getStart() const noexcept;
-    [[nodiscard]] constexpr int getEnd() const noexcept;
-    [[nodiscard]] constexpr int getColumn() const noexcept;
-    [[nodiscard]] constexpr int getLine() const noexcept;
-    [[nodiscard]] constexpr bool getIsOperator() const noexcept;
+    [[nodiscard]] TokenType getType() const noexcept;
+    [[nodiscard]] int getStart() const noexcept;
+    [[nodiscard]] int getEnd() const noexcept;
+    [[nodiscard]] int getColumn() const noexcept;
+    [[nodiscard]] int getLine() const noexcept;
+    [[nodiscard]] bool getIsOperator() const noexcept;
+
+    void setValue(std::string_view new_value);
+    [[nodiscard]] const std::string_view& getValue() const noexcept;
 private:
     TokenType type;
     int start;
@@ -45,29 +46,7 @@ private:
     int column;
     int line;
     bool isOperator;
-};
-
-template<class T>
-concept CorrectTokenType = std::is_same_v<T, char> || std::is_same_v<T, std::string_view>;
-
-template<CorrectTokenType T>
-class Token : public BaseToken
-{
-public:
-    Token() = delete;
-    constexpr Token(TokenType _type, T _value, int _position, int _column, int _line, bool _isOperator) noexcept;
-
-    constexpr Token(const Token& other) = default;
-    constexpr Token& operator=(const Token& other) = default;
-    constexpr Token(Token&& other) noexcept = default;
-    constexpr Token& operator=(Token&& other) noexcept = default;
-
-    constexpr ~Token() noexcept override = default;
-
-    void setValue(T new_value);
-    const T& getValue() const noexcept;
-private:
-    T value;
+    std::string_view value;
 };
 
 
@@ -79,9 +58,9 @@ private:
 class Tokens
 {
 public:
-    Tokens(std::vector<std::unique_ptr<BaseToken>>&& _tokens, std::string_view _str) noexcept;
+    Tokens(std::vector<Token>&& _tokens, std::string_view _str) noexcept;
 private:
-    std::vector<std::unique_ptr<BaseToken>> tokens;
+    std::vector<Token> tokens;
     std::string_view str;
 };
 
