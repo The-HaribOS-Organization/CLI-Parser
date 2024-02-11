@@ -38,3 +38,7 @@
 # exclude Standart Tartine's Library files
 /src/std/
 /include/std/
+
+# exclude CMake files and folders
+CMakeLists.txt
+/cmake-build-debug/
